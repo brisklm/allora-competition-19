@@ -53,15 +53,6 @@ MODEL_CACHE = {
     "last_update": None
 }
 
-# Add robust NaN handling function
-def handle_nan(data):
-    """Robust NaN handling with low-variance check"""
-    data = np.nan_to_num(data, nan=0.0)
-    variance = np.var(data, axis=0)
-    low_var_mask = variance < 1e-6
-    if np.any(low_var_mask):
-        print("Warning: Low variance features detected")
-    return data
-
+# Ensure compatibility with current endpoints
 if __name__ == "__main__":
     app.run(port=FLASK_PORT)
