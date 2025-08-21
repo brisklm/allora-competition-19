@@ -19,7 +19,7 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
-# Competition 19: BTC/USD 8h log-return prediction (topic 65)
+# Competition 19: BTC/USD 8h log-return prediction (5min updates)
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
 TRAINING_DAYS = int(os.getenv('TRAINING_DAYS', 365))
@@ -31,18 +31,38 @@ CG_API_KEY = os.getenv('CG_API_KEY', 'CG-xA5NyokGEVbc4bwrvJPcpZvT')
 HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79ead')
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
-# Feature set optimized for BTC/USD 8h log-return prediction (Competition 19, topic 65)
-# Added sign/log-return lags, momentum filters, VADER sentiment
-# Ensure robust NaN handling and low-variance checks in pipeline
+# Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
+# Keep only features that our pipeline actually computes.
+# Engineered: sign/log-return lags, momentum filters
 SELECTED_FEATURES = [
     # Primary BTC features
-    'close', 'volume', 'high', 'low', 'open',
-    # Engineered: sign/log-return lags and momentum filters
-    'log_return_lag1', 'log_return_lag2', 'log_return_lag3',
-    'sign_lag1', 'sign_lag2',
-    'momentum_5', 'momentum_10', 'momentum_filter_8h',
+    'log_return_lag1',
+    'log_return_lag2',
+    'log_return_lag3',
+    'sign',
+    'momentum_7',
+    'momentum_14',
+    'rsi_14',
+    'sma_50',
+    'volatility_20',
     # VADER sentiment
-    'vader_sentiment_compound', 'vader_sentiment_positive',
-    # Other crypto features for correlation
-    'eth_close', 'eth_log_return_lag1', 'sol_volume', 'sol_momentum_5'
+    'vader_compound',
+    'vader_positive',
+    'vader_negative',
+    # Cross-asset features for correlation
+    'eth_log_return_lag1',
+    'sol_volume_change'
 ]
+# Hyperparams adjusted for suggestions (max_depth/num_leaves, regularization)
+HYPERPARAMS = {
+    'max_depth': 10,
+    'num_leaves': 50,
+    'reg_alpha': 0.1,
+    'reg_lambda': 0.1
+}
+# For stabilizing predictions
+SMOOTHING_WINDOW = 3  # For smoothing
+ENSEMBLE_MODELS = 5  # For ensembling
+# NaN handling and low-variance check
+NAN_STRATEGY = 'fillna_mean'
+VARIANCE_THRESHOLD = 1e-5
