@@ -1,14 +1,15 @@
 import os
 from datetime import datetime
 import numpy as np
+# Optional: avoid hard dependency on nltk in runtime
 try:
-    from nltk.sentiment.vader import SentimentIntensityAnalyzer
-except Exception:
-    SentimentIntensityAnalyzer = None
+    from nltk.sentiment.vader import SentimentIntensityAnalyzer  # type: ignore
+except Exception:  # pragma: no cover
+    SentimentIntensityAnalyzer = None  # type: ignore
 try:
-    import optuna
-except Exception:
-    optuna = None
+    import optuna  # noqa: F401
+except Exception:  # pragma: no cover
+    optuna = None  # type: ignore
 data_base_path = os.path.join(os.getcwd(), 'data')
 model_file_path = os.path.join(data_base_path, 'model.pkl')
 scaler_file_path = os.path.join(data_base_path, 'scaler.pkl')
@@ -19,6 +20,7 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
+# Competition 19: BTC/USD 8h log-return prediction (topic 65)
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
 TRAINING_DAYS = int(os.getenv('TRAINING_DAYS', 365))
@@ -30,7 +32,31 @@ CG_API_KEY = os.getenv('CG_API_KEY', 'CG-xA5NyokGEVbc4bwrvJPcpZvT')
 HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79ead')
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
-SELECTED_FEATURES = ['volatility_BTCUSDT', 'volume_change_BTCUSDT', 'momentum_BTCUSDT', 'rsi_BTCUSDT', 'ma5_BTCUSDT', 'ma20_BTCUSDT', 'macd_BTCUSDT', 'bb_upper_BTCUSDT', 'bb_lower_BTCUSDT', 'sign_log_return_lag1_BTCUSDT', 'garch_vol_BTCUSDT', 'volatility_ETHUSDT', 'volume_change_ETHUSDT', 'sol_btc_corr', 'sol_eth_corr', 'sol_btc_vol_ratio', 'sol_btc_volume_ratio', 'sol_eth_vol_ratio', 'sol_eth_momentum_ratio', 'sentiment_score', 'sol_tx_volume', 'hour_of_day', *[f'open_ETHUSDT_lag{i}' for i in range(1, 11)], *[f'high_ETHUSDT_lag{i}' for i in range(1, 11)], *[f'low_ETHUSDT_lag{i}' for i in range(1, 11)], *[f'close_ETHUSDT_lag{i}' for i in range(1, 11)], *[f'open_BTCUSDT_lag{i}' for i in range(1, 11)], *[f'high_BTCUSDT_lag{i}' for i in range(1, 11)], *[f'low_BTCUSDT_lag{i}' for i in range(1, 11)], *[f'close_BTCUSDT_lag{i}' for i in range(1, 11)]]
-MODEL_PARAMS = {'n_estimators': 200, 'learning_rate': 0.02, 'num_leaves': 31, 'max_depth': -1, 'min_child_samples': 20, 'subsample': 0.8, 'colsample_bytree': 0.8, 'n_jobs': 1, 'hidden_size': 64, 'num_layers': 2}
-OPTUNA_TRIALS = int(os.getenv('OPTUNA_TRIALS', 50))
-USE_SYNTHETIC_DATA = os.getenv('USE_SYNTHETIC_DATA', 'True').lower() == 'true'
+# Feature set adapted to BTC/USD 8h log-return prediction for competition19 (topic 65)
+# Keep only features that our pipeline can handle
+# Engineered sign/log-return lags and momentum filters for improved directional accuracy and correlation
+FEATURES = [
+    'log_return', 'log_return_lag1', 'log_return_lag2', 'log_return_lag3',
+    'sign_return', 'momentum_5', 'momentum_10',
+    'vader_sentiment_compound', 'volume', 'rsi_14', 'macd'
+]
+# Model parameters adjusted for optimization (e.g., regularization, max_depth/num_leaves)
+MODEL_PARAMS = {
+    'lstm_units': 50,
+    'dropout': 0.2,
+    'epochs': 100,
+    'batch_size': 32,
+    'max_depth': 5,
+    'num_leaves': 31,
+    'reg_alpha': 0.1,
+    'reg_lambda': 0.1
+}
+# Optuna tuning settings (optional)
+OPTUNA_TRIALS = 50
+# Robust NaN handling and low-variance checks
+NA_FILL_METHOD = 'ffill'
+LOW_VARIANCE_THRESHOLD = 0.01
+# Stabilization via smoothing or ensembling
+SMOOTHING_ALPHA = 0.1
+ENSEMBLE_METHOD = 'average'
+USE_SENTIMENT = True if SentimentIntensityAnalyzer else False
