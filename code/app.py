@@ -50,12 +50,8 @@ MODEL_CACHE = {
     "model": None,
     "selected_features": [],
     "last_model_mtime": None,
-    "last_update": None
+    "last_features_mtime": None
 }
 
-@app.route('/tools', methods=['GET'])
-def get_tools():
-    return jsonify(TOOLS)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=FLASK_PORT, debug=True)
+if __name__ == "__main__":
+    app.run(port=FLASK_PORT)
