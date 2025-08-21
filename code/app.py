@@ -53,6 +53,9 @@ MODEL_CACHE = {
     "last_update": None
 }
 
-# Ensure compatibility with current endpoints
-if __name__ == "__main__":
-    app.run(port=FLASK_PORT)
+@app.route('/tools', methods=['GET'])
+def get_tools():
+    return jsonify(TOOLS)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=FLASK_PORT, debug=True)
