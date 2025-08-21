@@ -20,7 +20,7 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
-# Competition 19: BTC/USD 8h log-return prediction (5min updates) - Topic 65
+# Competition 19: BTC/USD 8h log-return prediction (topic 65)
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
 TRAINING_DAYS = int(os.getenv('TRAINING_DAYS', 365))
@@ -32,22 +32,38 @@ CG_API_KEY = os.getenv('CG_API_KEY', 'CG-xA5NyokGEVbc4bwrvJPcpZvT')
 HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79ead')
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
-# Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle, added sign/log-return lags, momentum filters, VADER sentiment
+# Feature set adapted to BTC/USD 8h log-return prediction (Competition 19, topic 65)
+# Keep only features that our pipeline can handle; added lags, momentum, VADER sentiment
 FEATURES = [
-    'close', 'volume', 'log_return', 'log_return_lag1', 'log_return_lag2', 'sign_return', 
-    'momentum_5', 'momentum_10', 'vader_sentiment_compound'
+    'open', 'high', 'low', 'close', 'volume',
+    'log_return_lag1', 'log_return_lag2', 'log_return_lag3',
+    'sign_lag1', 'sign_lag2',
+    'momentum_5', 'momentum_8', 'momentum_13',
+    'vader_compound', 'vader_positive', 'vader_negative'  # VADER sentiment
 ]
-# Additional configs for optimization and suggestions
-USE_VADER = True
-USE_OPTUNA = True
-NAN_HANDLING = 'ffill'
-VARIANCE_THRESHOLD = 0.0001
+# Model tuning params (adjust max_depth/num_leaves, add regularization)
 MODEL_PARAMS = {
-    'max_depth': 8,
-    'num_leaves': 25,
-    'reg_alpha': 0.05,
-    'reg_lambda': 0.05
+    'max_depth': 6,
+    'num_leaves': 40,
+    'reg_alpha': 0.2,
+    'reg_lambda': 0.2
 }
-ENSEMBLE_METHOD = 'average'
-SMOOTHING = 'ewm'
+# For LSTM_Hybrid
+LSTM_PARAMS = {
+    'hidden_size': 128,
+    'num_layers': 3,
+    'dropout': 0.3
+}
+# Performance targets
+TARGET_R2 = 0.1
+TARGET_DIR_ACC = 0.6
+TARGET_CORR = 0.25
+# Stabilization: smoothing and ensembling
+SMOOTHING_METHOD = 'ewm'
+SMOOTHING_ALPHA = 0.05
+USE_ENSEMBLE = True
+ENSEMBLE_SIZE = 5
+# Robust NaN handling and low-variance checks
+NAN_HANDLING = 'ffill_then_interpolate'
+LOW_VAR_CHECK = True
+LOW_VAR_THRESH = 1e-5
