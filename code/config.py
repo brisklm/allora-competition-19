@@ -20,7 +20,7 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
-# Competition 19: BTC/USD 8h log-return prediction (5min updates) - Optimized for topic 65
+# Competition 19: BTC/USD 8h log-return prediction (5min updates)
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
 TRAINING_DAYS = int(os.getenv('TRAINING_DAYS', 365))
@@ -33,12 +33,14 @@ HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79e
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
 # Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle; added VADER sentiment, sign/log-return lags, momentum filters
-# Optimized for R2 > 0.1, directional accuracy > 0.6, correlation > 0.25; added smoothing/ensembling
-# Ensure robust NaN handling (ffill) and low-variance checks (threshold 0.01)
-OPTUNA_TUNING = True  # Enable optional Optuna tuning
-NAN_HANDLING = 'ffill'
+# Keep only features that our pipeline can handle
+FEATURES = ['open', 'high', 'low', 'close', 'volume', 'log_return_lag1', 'log_return_lag2', 'sign_lag1', 'momentum_5', 'rsi_14']
+if SentimentIntensityAnalyzer:
+    FEATURES.append('vader_sentiment')
+# Model parameters for optimization
+MODEL_PARAMS = {'max_depth': 5, 'num_leaves': 31, 'reg_alpha': 0.1, 'reg_lambda': 0.1}
+OPTUNA_TRIALS = 50 if optuna else 0
+NAN_HANDLE = 'ffill'
 LOW_VARIANCE_THRESHOLD = 0.01
-MODEL_PARAMS = {'max_depth': 8, 'num_leaves': 40, 'reg_alpha': 0.2, 'reg_lambda': 0.2}  # Adjusted for regularization
-FEATURES = ['log_return_lag1', 'log_return_lag2', 'log_return_lag3', 'momentum_8h', 'sign_return', 'vader_sentiment_compound', 'volume_change', 'rsi_14', 'ma_50', 'sol_correlation', 'eth_momentum']  # Optimized features
-ENSEMBLE = True  # Stabilize predictions via ensembling
+ENSEMBLE = True
+POST_PROCESS = 'smoothing'
