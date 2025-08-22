@@ -28,30 +28,30 @@ TOOLS = [
         "name": "write_code",
         "description": "Writes complete source code to a specified file, overwriting existing content after syntax validation.",
         "parameters": {
-            "title": {"type": "string", "description": "Filename (e.g., model.py)", "required": True},
-            "content": {"type": "string", "description": "Complete source code content", "required": True},
-            "artifact_id": {"type": "string", "description": "Artifact UUID", "required": False},
-            "artifact_version_id": {"type": "string", "description": "Version UUID", "required": False},
-            "contentType": {"type": "string", "description": "Content type (e.g., text/python)", "required": False}
+            "title": {"type": "string", "description": "Filename (e.g., model.py)", "required": true},
+            "content": {"type": "string", "description": "Complete source code content", "required": true},
+            "artifact_id": {"type": "string", "description": "Artifact UUID", "required": false},
+            "artifact_version_id": {"type": "string", "description": "Version UUID", "required": false},
+            "contentType": {"type": "string", "description": "Content type (e.g., text/python)", "required": false}
         }
     },
     {
         "name": "commit_to_github",
         "description": "Commits changes to GitHub repository.",
         "parameters": {
-            "message": {"type": "string", "description": "Commit message", "required": True},
-            "files": {"type": "array", "description": "List of files to commit", "required": False}
+            "commit_message": {"type": "string", "description": "The commit message", "required": true},
+            "files": {"type": "array", "description": "List of files to commit", "required": false}
         }
     }
 ]
 
+@app.route('/', methods=['GET'])
+def home():
+    return f"MCP Version: {MCP_VERSION}"
+
 @app.route('/tools', methods=['GET'])
-def tools():
+def get_tools():
     return jsonify(TOOLS)
 
-@app.route('/version', methods=['GET'])
-def version():
-    return jsonify({"version": MCP_VERSION})
-
 if __name__ == '__main__':
-    app.run(port=FLASK_PORT, debug=True)
+    app.run(host='0.0.0.0', port=FLASK_PORT, debug=True)
