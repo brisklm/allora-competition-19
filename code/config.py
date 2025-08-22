@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 import numpy as np
-from sklearn.feature_selection import VarianceThreshold
 # Optional: avoid hard dependency on nltk in runtime
 try:
     from nltk.sentiment.vader import SentimentIntensityAnalyzer  # type: ignore
@@ -21,7 +20,7 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
-# Competition 19: BTC/USD 8h log-return prediction (5min updates) for topic 65
+# Competition 19: BTC/USD 8h log-return prediction (5min updates) - Optimized for topic 65
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
 TRAINING_DAYS = int(os.getenv('TRAINING_DAYS', 365))
@@ -34,27 +33,17 @@ HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79e
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
 # Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle
-FEATURES = [
-    'open', 'high', 'low', 'close', 'volume',
-    'log_return', 'log_return_lag1', 'log_return_lag2', 'log_return_lag3',
-    'sign', 'momentum_5', 'momentum_10',
-    'rsi_14', 'macd', 'bollinger_upper', 'bollinger_lower',
-    'vader_compound',  # VADER sentiment
-    # Engineered for correlation >0.25, directional accuracy >0.6
-]
-# Model parameters for optimization (adjust max_depth/num_leaves, add regularization)
-MODEL_PARAMS = {
-    'lstm_hidden_size': 64,
-    'lstm_layers': 2,
-    'dropout': 0.2,  # regularization
-    'max_depth': 8,
-    'num_leaves': 31,
-}
-# For ensembling to stabilize predictions
-ENABLE_ENSEMBLE = True
-ENSEMBLE_MODELS = 5
-# For low-variance checks
-VARIANCE_THRESHOLD = 0.01
-OPTUNA_TRIALS = 100  # For optional Optuna tuning
-LOSS_FUNCTION = 'mse'  # Tuned for R2 >0.1
+# Keep only features that our pipeline can handle, added sign/log-return lags, momentum filters, VADER sentiment
+FEATURES = ['log_return_lag1', 'log_return_lag2', 'log_return_lag3', 'log_return_lag8', 'sign_lag1', 'momentum_8h', 'rsi_14', 'macd', 'volume_change', 'vader_compound', 'close']
+# Optimizations for suggestions
+OPTUNA_TRIALS = 100  # For optional Optuna tuning to improve R2 > 0.1, directional accuracy > 0.6
+MAX_DEPTH = 8  # Adjust max_depth/num_leaves
+NUM_LEAVES = 31
+REG_ALPHA = 0.1  # Add regularization
+REG_LAMBDA = 0.1
+ENSEMBLE = True  # Stabilize predictions via ensembling
+SMOOTHING = 'ema'  # Stabilize via smoothing
+CORR_THRESHOLD = 0.25  # Increase correlation magnitude above 0.25
+# Robust handling
+IMPUTE_METHOD = 'ffill'  # NaN handling
+VARIANCE_THRESHOLD = 1e-4  # Low-variance checks
