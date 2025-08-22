@@ -33,33 +33,25 @@ HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79e
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
 # Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle without extra dependencies
-FEATURE_SET = [
-    'log_return', 'volume', 'high_low_spread',
-    'log_return_lag1', 'log_return_lag2', 'log_return_lag3',
-    'sign_lag1', 'momentum_filter_5', 'momentum_filter_10',
-    'vader_sentiment_compound',  # Assuming sentiment data available
-    'eth_correlation', 'sol_momentum'  # Cross-asset features
+# Keep only features that our pipeline can handle, including engineered ones
+FEATURES = [
+    'close', 'volume', 'log_return', 'sign_log_return',
+    'lag_log_return_1', 'lag_log_return_2', 'lag_log_return_3',
+    'momentum_5', 'momentum_8', 'momentum_filter',
+    'vader_sentiment_score',  # Incorporated VADER sentiment
+    # Other relevant features for BTC/USD
+    'rsi_14', 'macd', 'bollinger_mid'
 ]
 # Optimization settings
-OPTUNA_ENABLED = True if optuna else False
-OPTUNA_TRIALS = 50
-# Parameter ranges for tuning (e.g., for LGBM or similar)
-PARAM_DIST = {
-    'max_depth': {'low': 3, 'high': 15},
-    'num_leaves': {'low': 20, 'high': 150},
-    'reg_alpha': {'low': 0, 'high': 1},
-    'reg_lambda': {'low': 0, 'high': 1},
-}
-# For performance targets
+USE_OPTUNA = optuna is not None
+OPTUNA_TRIALS = 100 if USE_OPTUNA else 0
+# Targets from suggestions
 TARGET_R2 = 0.1
-TARGET_DIR_ACC = 0.6
-TARGET_CORR = 0.25
-# Handling
-NAN_HANDLING = 'ffill'  # or 'interpolate'
-LOW_VARIANCE_THRESHOLD = 1e-4
+TARGET_DIRECTIONAL_ACCURACY = 0.6
+TARGET_CORRELATION = 0.25
 # Stabilization
 USE_ENSEMBLING = True
-ENSEMBLE_MODELS = 5
-SMOOTHING = 'ewm'  # exponential weighted moving average
-SMOOTHING_ALPHA = 0.1
+USE_SMOOTHING = True
+# Robust handling
+NAN_HANDLING_METHOD = 'interpolate'
+LOW_VARIANCE_THRESHOLD = 1e-4
