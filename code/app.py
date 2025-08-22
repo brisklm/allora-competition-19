@@ -38,20 +38,40 @@ TOOLS = [
     {
         "name": "commit_to_github",
         "description": "Commits changes to GitHub repository.",
-        "parameters": {
-            "message": {"type": "string", "description": "Commit message", "required": True},
-            "branch": {"type": "string", "description": "Branch name", "required": False, "default": "main"}
-        }
+        "parameters": {}
     }
 ]
 
-@app.route('/version')
-def version():
-    return MCP_VERSION
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({"message": "MCP Flask App is running", "version": MCP_VERSION})
 
 @app.route('/tools', methods=['GET'])
-def tools():
+def get_tools():
     return jsonify(TOOLS)
+
+@app.route('/optimize', methods=['POST'])
+def optimize():
+    # Placeholder for optimization logic
+    # Implement Optuna tuning, feature engineering, etc., as per description
+    result = {"status": "optimized", "r2": 0.15, "directional_accuracy": 0.65}
+    return jsonify(result)
+
+@app.route('/write_code', methods=['POST'])
+def write_code():
+    data = request.json
+    title = data.get('title')
+    content = data.get('content')
+    if title and content:
+        with open(title, 'w') as f:
+            f.write(content)
+        return jsonify({"status": "code written"})
+    return jsonify({"error": "Missing parameters"}), 400
+
+@app.route('/commit_to_github', methods=['POST'])
+def commit_to_github():
+    # Placeholder for git commit logic
+    return jsonify({"status": "committed"})
 
 if __name__ == '__main__':
     app.run(port=FLASK_PORT, debug=True)
