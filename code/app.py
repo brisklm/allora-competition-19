@@ -53,10 +53,9 @@ MODEL_CACHE = {
     "last_update": None
 }
 
-# Add endpoint compatibility (stub for prediction, assuming exists in full code)
-@app.route('/predict', methods=['POST'])
-def predict():
-    return jsonify({'prediction': 0.0, 'version': MCP_VERSION})
+@app.route('/tools', methods=['GET'])
+def get_tools():
+    return jsonify(TOOLS)
 
 if __name__ == '__main__':
-    app.run(port=FLASK_PORT)
+    app.run(port=FLASK_PORT, debug=True)
