@@ -21,7 +21,7 @@ FLASK_PORT = int(os.getenv("FLASK_PORT", 8001))
 TOOLS = [
     {
         "name": "optimize",
-        "description": "Triggers model optimization using Optuna tuning and returns results.",
+        "description": "Triggers model optimization using Optuna tuning with adjustments to max_depth/num_leaves, adding regularization, to improve R2 above 0.1, increase directional accuracy above 0.6, engineer sign/log-return lags and momentum filters, increase correlation magnitude above 0.25, stabilize predictions via smoothing or ensembling, incorporate VADER sentiment, ensure robust NaN handling and low-variance checks, and returns results.",
         "parameters": {}
     },
     {
@@ -50,6 +50,7 @@ MODEL_CACHE = {
     "model": None,
     "selected_features": [],
     "last_model_mtime": None,
+    "last_features_mtime": None,
     "last_update": None
 }
 
