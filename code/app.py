@@ -40,22 +40,17 @@ TOOLS = [
         "description": "Commits changes to GitHub repository.",
         "parameters": {
             "message": {"type": "string", "description": "Commit message", "required": True},
-            "files": {"type": "array", "description": "List of files to commit", "items": {"type": "string"}}
+            "branch": {"type": "string", "description": "Branch name", "required": False, "default": "main"}
         }
     }
 ]
 
-# In-memory cache for inference
-MODEL_CACHE = {
-    "model": None,
-    "selected_features": [],
-    "last_model_mtime": None,
-    "last_features_mtime": None,
-    "last_update": None
-}
+@app.route('/version')
+def version():
+    return MCP_VERSION
 
 @app.route('/tools', methods=['GET'])
-def get_tools():
+def tools():
     return jsonify(TOOLS)
 
 if __name__ == '__main__':
