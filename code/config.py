@@ -20,6 +20,8 @@ sol_source_path = os.path.join(data_base_path, os.getenv('SOL_SOURCE', 'raw_sol.
 eth_source_path = os.path.join(data_base_path, os.getenv('ETH_SOURCE', 'raw_eth.csv'))
 features_sol_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH', 'features_sol.csv'))
 features_eth_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_ETH', 'features_eth.csv'))
+btc_source_path = os.path.join(data_base_path, os.getenv('BTC_SOURCE', 'raw_btc.csv'))
+features_btc_path = os.path.join(data_base_path, os.getenv('FEATURES_PATH_BTC', 'features_btc.csv'))
 # Competition 19: BTC/USD 8h log-return prediction (5min updates)
 TOKEN = os.getenv('TOKEN', 'BTC')
 TIMEFRAME = os.getenv('TIMEFRAME', '8h')
@@ -33,25 +35,5 @@ HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79e
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
 BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
 # Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle, including engineered ones
-FEATURES = [
-    'close', 'volume', 'log_return', 'sign_log_return',
-    'lag_log_return_1', 'lag_log_return_2', 'lag_log_return_3',
-    'momentum_5', 'momentum_8', 'momentum_filter',
-    'vader_sentiment_score',  # Incorporated VADER sentiment
-    # Other relevant features for BTC/USD
-    'rsi_14', 'macd', 'bollinger_mid'
-]
-# Optimization settings
-USE_OPTUNA = optuna is not None
-OPTUNA_TRIALS = 100 if USE_OPTUNA else 0
-# Targets from suggestions
-TARGET_R2 = 0.1
-TARGET_DIRECTIONAL_ACCURACY = 0.6
-TARGET_CORRELATION = 0.25
-# Stabilization
-USE_ENSEMBLING = True
-USE_SMOOTHING = True
-# Robust handling
-NAN_HANDLING_METHOD = 'interpolate'
-LOW_VARIANCE_THRESHOLD = 1e-4
+# Keep only features that our pipeline can handle, engineered for sign/log-return lags, momentum filters, VADER sentiment
+# Optimizations: improve R2 >0.1, directional acc >0.6, correlation >0.25, smoothing/ensembling, NaN handling, low-variance checks
