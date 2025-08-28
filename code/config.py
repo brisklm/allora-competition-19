@@ -33,7 +33,17 @@ MODEL = os.getenv('MODEL', 'LSTM_Hybrid')
 CG_API_KEY = os.getenv('CG_API_KEY', 'CG-xA5NyokGEVbc4bwrvJPcpZvT')
 HELIUS_API_KEY = os.getenv('HELIUS_API_KEY', '70ed65ce-4750-4fd5-83bd-5aee9aa79ead')
 HELIUS_RPC_URL = os.getenv('HELIUS_RPC_URL', 'https://mainnet.helius-rpc.com')
-BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY8EVb-P_PQVP9ntfwUVTV05LMal7xUqb2I.vxFLfMEoLGcu4XoVi47j-E2bspraTSrmYzCt1A4y2k')
-# Feature set adapted to BTC/USD 8h log-return prediction (Competition 19)
-# Keep only features that our pipeline can handle, engineered for sign/log-return lags, momentum filters, VADER sentiment
-# Optimizations: improve R2 >0.1, directional acc >0.6, correlation >0.25, smoothing/ensembling, NaN handling, low-variance checks
+BITQUERY_API_KEY = os.getenv('BITQUERY_API_KEY', 'ory_at_LmFLzUutMY')
+# Optimizations for competition19 topic65
+LAG_FEATURES = [1, 3, 5, 8]  # Sign/log-return lags
+MOMENTUM_WINDOWS = [4, 8, 12]  # Momentum filters
+REGULARIZATION = 0.1
+MAX_DEPTH = 6
+NUM_LEAVES = 31
+TARGET_R2 = 0.1
+TARGET_DIR_ACC = 0.6
+TARGET_CORR = 0.25
+USE_ENSEMBLING = True
+SMOOTHING_FACTOR = 0.2
+VARIANCE_THRESHOLD = 1e-4
+NAN_FILL_METHOD = 'ffill'
